@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Point reactor kinetics: Reactor Sandbox</title>
+  <link rel="stylesheet" href="js/vendor/uPlot.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+  <p><a href="index.html">&larr; All chapters</a></p>
+  <h1>Chapter 1: Point reactor kinetics</h1>
+
+  <p>A reactor is critical when each fission leads, on average, to exactly one further
+    fission. The distance from that balance is the <strong>reactivity</strong> &rho;. Measured
+    in <em>pcm</em> (1 pcm = 10<sup>-5</sup>) or in <em>dollars</em>, where 1 $ equals the
+    delayed neutron fraction &beta; &asymp; 650 pcm.</p>
+
+  <p>If all neutrons were born instantly, the power would change by a factor of e every
+    &Lambda;/&rho; seconds. With &Lambda; around 0.1 ms, a mere +100 pcm would multiply the
+    power by e<sup>10</sup> in a single second. A reactor that fast would be uncontrollable.
+    What saves us are the <strong>delayed neutrons</strong>: about 0.65 % of the neutrons come
+    from fission products that decay seconds to minutes after the fission. As long as &rho; &lt;
+    &beta;, those slow neutrons set the pace.</p>
+
+  <pre>dP/dt   = (&rho; - &beta;)/&Lambda; &middot; P + &Sigma; &lambda;<sub>i</sub> C<sub>i</sub>
+dC<sub>i</sub>/dt = &beta;<sub>i</sub>/&Lambda; &middot; P - &lambda;<sub>i</sub> C<sub>i</sub>        (i = 1..6)</pre>
+
+  <h2>Try it</h2>
+  <p>Pick a scenario or set your own reactivity step. The reactor starts critical at power 1,
+    the step happens at the time you choose, and the optional SCRAM drops all control rods
+    (&minus;5000 pcm) later.</p>
+
+  <div class="widget">
+    <label>Scenario
+      <select id="preset"><option value="">Custom</option></select>
+    </label>
+    <p id="preset-text" class="preset-text"></p>
+
+    <div class="controls">
+      <label>Reactivity step: <span class="value" id="rho-label"></span>
+        <input id="rho" type="range" min="-1000" max="800" step="5" value="100">
+      </label>
+      <label>Step at (s)
+        <input id="t-step" type="number" min="1" max="590" step="1" value="10">
+      </label>
+      <label>SCRAM at (s)
+        <input id="t-scram" type="number" min="1" max="590" step="1" value="60">
+      </label>
+      <label>End time (s)
+        <input id="t-end" type="number" min="5" max="600" step="5" value="120">
+      </label>
+    </div>
+
+    <div class="buttons">
+      <button id="run">Run</button>
+      <button id="run-scram" class="scram">Run with SCRAM</button>
+      <label><input id="log" type="checkbox" checked> Log scale</label>
+    </div>
+    <div id="status"></div>
+    <div id="plot"></div>
+    <p class="sources">Each run is stored; the address bar holds a link you can share.</p>
+  </div>
+
+  <h2>What to look for</h2>
+  <ul>
+    <li><strong>Small step (+100 pcm):</strong> a small immediate jump, then a slow rise. The
+      period of that rise is given by the inhour equation.</li>
+    <li><strong>Above +650 pcm (1 $):</strong> prompt critical. Delayed neutrons no longer
+      matter and the power explodes on a millisecond scale. The calculation stops when the
+      power has grown a billion times.</li>
+    <li><strong>SCRAM:</strong> the power falls to around 10 % almost at once, then decays
+      slowly. The decay heat story starts here: the longest-lived precursor group has a mean
+      life of about 80 s.</li>
+  </ul>
+
+  <p class="sources">Delayed neutron data: six-group Keepin data for thermal fission of U-235
+    (Keepin, Wimett and Zeigler, 1957). Prompt generation time &Lambda; = 10<sup>-4</sup> s.
+    Equations are integrated with an implicit Radau method (SciPy).</p>
+</main>
+<script src="js/vendor/uPlot.iife.min.js"></script>
+<script src="js/kinetics.js"></script>
+</body>
+</html>

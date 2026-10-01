@@ -1,0 +1,11 @@
+# SITE_ADDRESS is ":80" locally (plain HTTP) and the domain name in production,
+# where Caddy then gets and renews a Let's Encrypt certificate automatically.
+{$SITE_ADDRESS::80} {
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+	handle {
+		root * /srv
+		file_server
+	}
+}

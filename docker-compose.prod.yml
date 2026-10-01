@@ -1,0 +1,44 @@
+# Production on the droplet. Images are built by CI and pulled from ghcr.io.
+# Needs a .env next to this file with GHCR_OWNER, POSTGRES_PASSWORD and SITE_ADDRESS.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: reactor
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: reactor
+    command: postgres -c shared_buffers=32MB -c max_connections=20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reactor"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    image: ghcr.io/${GHCR_OWNER}/reactor-backend:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://reactor:${POSTGRES_PASSWORD}@db:5432/reactor
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: ghcr.io/${GHCR_OWNER}/reactor-web:latest
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data  # keeps the HTTPS certificates across restarts
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  caddy_data:
