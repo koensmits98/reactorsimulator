@@ -34,8 +34,9 @@ services:
       SITE_ADDRESS: ${SITE_ADDRESS:-:80}
     ports:
       # HTTP_PORT defaults to 80; set it to 8080 in .env while another site uses port 80.
+      # Add "443:443" once a domain points here and SITE_ADDRESS is that domain.
+      # Note: Docker opens published ports itself, bypassing ufw.
       - "${HTTP_PORT:-80}:80"
-      - "443:443"
     volumes:
       - caddy_data:/data  # keeps the HTTPS certificates across restarts
     depends_on:
